@@ -38,7 +38,7 @@ single_asdf <- function(res) {
   return(cur_dat)
 }
 
-result_asdf <- function(res, output) {
+result_asdf <- function(res) {
   score_ls <- vector("list", length(res))
   res_ls <- vector("list", length(res))
   id_ls <- vector("list", length(res))
@@ -89,10 +89,6 @@ result_asdf <- function(res, output) {
     # names(cur_dat)[7] <- "raw_txt"
     res_ls[[i]] <- cur_dat
   }
-  output$test_out <- renderText({ paste("len res_ls:",
-                                        length(score_ls),
-                                        length(id_ls),
-                                        length(type_ls)) })
   cur_res_df <- suppressWarnings(dplyr::bind_rows(res_ls))
   cur_res_df$score <- unlist(score_ls)
   cur_res_df$id <- unlist(id_ls)
@@ -370,8 +366,7 @@ shinyServer(function(input, output, session) {
     if(!is.null(s_res)) {
       perf_match <- filter(s_res, search_term == cur_input())
     }
-    # if(length(s_res$search_term) > 0) {
-    if(exists("perf_match") && length(perf_match$search_term) > 0 & input$use_cache) {
+    if(exists("perf_match") && length(perf_match$search_term) > 0) {
       cur_res <- readRDS(perf_match$rds_path)
       upd <- docs_update(
         index = "presearch",
@@ -437,7 +432,7 @@ shinyServer(function(input, output, session) {
                            body = body)$hits$hits
     })
     if(length(cur_mats) > 0) {
-      intermed_df <- result_asdf(cur_mats, output)
+      intermed_df <- result_asdf(cur_mats)
       res <- try(intermed_df$highlight <- get_highlight(cur_mats))
       if(class(res) == "try-error") {
         intermed_df$highlight <- paste(
