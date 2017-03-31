@@ -135,22 +135,17 @@ body <- dashboardBody(fluidPage(
                 )
               )
             ),
-            # fluidRow( helpText(htmlOutput("n_docs")) ),
             fluidRow(
-              column(3),
-              column(6,
-                awesomeRadio(
-                  inputId = "use_cache",
-                  label = NULL,
-                  choices = c(
-                    "Cache (faster)" = "yes",
-                    "No cache (thorough)" = "no"
-                  ),
-                  selected = "yes",
-                  inline = TRUE
-                )
-              ),
-              column(3)
+              awesomeRadio(
+                inputId = "use_cache",
+                label = NULL,
+                choices = c(
+                  "Cache (faster)" = "yes",
+                  "No cache (thorough)" = "no"
+                ),
+                selected = "yes",
+                inline = TRUE
+              )
             )
           ),
           column(2,
@@ -294,6 +289,9 @@ body <- dashboardBody(fluidPage(
           ),
           column(4,
             br(), br(),
+            hidden(
+              fluidRow(helpText(htmlOutput("n_docs")))
+            ),
             fluidRow(
               uiOutput("summary_figs", height = "300px")
             )
@@ -351,7 +349,7 @@ body <- dashboardBody(fluidPage(
     fluidRow(
       div(
         id = "pad_foot",
-        br(), br(), br(), br(), br(), br()
+        br(), br(), br(), br(), br()
       ),
       hidden(div(
         br(), br(), br()

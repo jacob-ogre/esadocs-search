@@ -12,8 +12,6 @@ library(shinyjs)
 library(shinyWidgets)
 library(stringr)
 
-source("helper.R")
-
 system("touch restart.txt", intern = FALSE)
 
 elastic::connect()

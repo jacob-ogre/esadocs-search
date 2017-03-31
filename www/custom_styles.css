@@ -174,3 +174,25 @@ img {
 .shiny-options-group {
   padding-top: 10px;
 }
+
+.checkbox-bs-primary input[type="checkbox"]:checked + label::before,
+.checkbox-bs-primary input[type="radio"]:checked + label::before {
+  background-color: #0E3670 !important;
+  border-color: #0E3670 !important;
+}
+
+.checkbox-bs-primary input[type="checkbox"]:indeterminate + label::before,
+.checkbox-bs-primary input[type="radio"]:indeterminate + label::before {
+  background-color: #0E3670 !important;
+  border-color: #0E3670 !important;
+}
+
+.radio-bs-primary input[type="radio"] + label::after {
+  background-color: #0E3670 !important;
+}
+.radio-bs-primary input[type="radio"]:checked + label::before {
+  border-color: #0E3670 !important;
+}
+.radio-bs-primary input[type="radio"]:checked + label::after {
+  background-color: #0E3670 !important;
+}
