@@ -135,7 +135,23 @@ body <- dashboardBody(fluidPage(
                 )
               )
             ),
-            fluidRow( helpText(htmlOutput("n_docs")) )
+            # fluidRow( helpText(htmlOutput("n_docs")) ),
+            fluidRow(
+              column(3),
+              column(6,
+                awesomeRadio(
+                  inputId = "use_cache",
+                  label = NULL,
+                  choices = c(
+                    "Cache (faster)" = "yes",
+                    "No cache (thorough)" = "no"
+                  ),
+                  selected = "yes",
+                  inline = TRUE
+                )
+              ),
+              column(3)
+            )
           ),
           column(2,
             fluidRow(
@@ -161,20 +177,20 @@ body <- dashboardBody(fluidPage(
         fluidRow(
           hidden(
             div(id = "extras",
-              # hr(style = "padding-above:2px; margin:1px"),
               column(2,
                 div(class = "slim",
-                  selectInput("show_n",
-                              label = NULL,
-                              choices = list(
-                                "5 hits/page" = 5,
-                                "10 hits/page" = 10,
-                                "20 hits/page" = 20,
-                                "50 hits/page" = 50,
-                                "100 hits/page" = 100),
-                              width = "95%",
-                              selected = 10,
-                              multiple = FALSE)
+                  selectInput(
+                    "show_n",
+                    label = NULL,
+                    choices = list(
+                      "5 hits/page" = 5,
+                      "10 hits/page" = 10,
+                      "20 hits/page" = 20,
+                      "50 hits/page" = 50,
+                      "100 hits/page" = 100),
+                    width = "95%",
+                    selected = 10,
+                    multiple = FALSE)
                 )
               ),
               column(1,
@@ -290,14 +306,22 @@ body <- dashboardBody(fluidPage(
               id = "nextprev",
               style = "width:50%; margin:0 auto;",
               div(style = "display: inline-block",
-                hidden(actionButton("prevButton",
-                         label = "< Previous",
-                         style = "default",
-                         size = "small"))
+                hidden(
+                  actionButton(
+                    "prevButton",
+                    label = "< Previous",
+                    style = "default",
+                    size = "small"
+                  )
+                )
               ),
-              hidden(div(id = "res_txt",
-                         "Results pages",
-                         style = "font-weight:bold; display:inline-block")),
+              hidden(
+                div(
+                  id = "res_txt",
+                  "Results pages",
+                  style = "font-weight:bold; display:inline-block"
+                )
+              ),
               div(style = "display: inline-block",
                 hidden(actionButton("nextButton",
                          label = "Next >",

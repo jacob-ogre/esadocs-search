@@ -9,6 +9,7 @@ library(shiny)
 library(shinydashboard)
 library(shinyBS)
 library(shinyjs)
+library(shinyWidgets)
 library(stringr)
 
 source("helper.R")

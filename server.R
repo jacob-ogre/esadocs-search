@@ -144,28 +144,6 @@ rand_str <- function(len=30) {
   return(str)
 }
 
-mySearch <- function (index = NULL, type = NULL, q = NULL, df = NULL, analyzer = NULL,
-                      default_operator = NULL, explain = NULL, source = NULL, fields = NULL,
-                      sort = NULL, track_scores = NULL, timeout = NULL, terminate_after = NULL,
-                      from = NULL, size = NULL, search_type = NULL, lowercase_expanded_terms = NULL,
-                      analyze_wildcard = NULL, version = FALSE, lenient = FALSE,
-                      body = list(), raw = FALSE, asdf = FALSE, scroll = NULL,
-                      search_path = "_search", ...) {
-  elastic:::search_POST(
-    search_path, elastic:::cl(index), type,
-    args = elastic:::ec(
-      list(
-        df = df,  analyzer = analyzer, default_operator = default_operator,
-        explain = explain, `_source` = elastic:::cl(source), fields = elastic:::cl(fields),
-        sort = elastic:::cl(sort), track_scores = track_scores, timeout = timeout,
-        terminate_after = elastic:::cn(terminate_after), from = elastic:::cn(from),
-        size = elastic:::cn(size), search_type = search_type, lowercase_expanded_terms = lowercase_expanded_terms,
-        analyze_wildcard = analyze_wildcard, version = elastic:::as_log(version),
-        q = q, scroll = scroll, lenient = elastic:::as_log(lenient))
-      ),
-      body, raw, asdf, ...)
-}
-
 ###############################################################################
 # SERVER
 
@@ -363,10 +341,14 @@ shinyServer(function(input, output, session) {
     )
     s_res <- searched$hits$hits$`_source`
     s_res$id <- searched$hits$hits$`_id`
+    a_match <- FALSE
     if(!is.null(s_res)) {
       perf_match <- filter(s_res, search_term == cur_input())
+      a_match <- TRUE
     }
-    if(exists("perf_match") && length(perf_match$search_term) > 0) {
+    if(exists("perf_match") &&
+       length(perf_match$search_term) > 0 &&
+       input$use_cache == "yes") {
       cur_res <- readRDS(perf_match$rds_path)
       upd <- docs_update(
         index = "presearch",
@@ -435,30 +417,13 @@ shinyServer(function(input, output, session) {
       intermed_df <- result_asdf(cur_mats)
       res <- try(intermed_df$highlight <- get_highlight(cur_mats))
       if(class(res) == "try-error") {
-        intermed_df$highlight <- paste(
+        intermed_df$highlight <- paste0(
           "Sorry, no context highlighting available for the search <b>", cur_input(), "</b>.",
-          "Please search within the PDF result."
+          " Please open the linked PDF and search within to find context."
         )
       }
       intermed_df <- distinct(intermed_df, file_name, .keep_all = TRUE)
-      id_str <- rand_str()
-      newf <- paste0("/home/jacobmalcom/Data/ESAdocs_presearch/", id_str, ".rds")
-      # newf <- paste0("~/Downloads/RDS_tests/", id_str, ".rds")
-      saveRDS(intermed_df, file = newf)
-      res <- docs_create(
-        index = "presearch",
-        type = "basic",
-        id = id_str,
-        body = list(
-          search_term = cur_input(),
-          count = 1,
-          rds_path = newf,
-          date = Sys.Date()
-        )
-      )
-      if(length(intermed_df[,1]) > 0) {
-        return(intermed_df)
-      } else {
+      if(!a_match) {
         id_str <- rand_str()
         newf <- paste0("/home/jacobmalcom/Data/ESAdocs_presearch/", id_str, ".rds")
         # newf <- paste0("~/Downloads/RDS_tests/", id_str, ".rds")
@@ -474,8 +439,27 @@ shinyServer(function(input, output, session) {
             date = Sys.Date()
           )
         )
-        return(NA)
       }
+      # if(length(intermed_df[,1]) > 0) {
+      return(intermed_df)
+      # } # else {
+      #   id_str <- rand_str()
+      #   # newf <- paste0("/home/jacobmalcom/Data/ESAdocs_presearch/", id_str, ".rds")
+      #   newf <- paste0("~/Downloads/RDS_tests/", id_str, ".rds")
+      #   saveRDS(intermed_df, file = newf)
+      #   res <- docs_create(
+      #     index = "presearch",
+      #     type = "basic",
+      #     id = id_str,
+      #     body = list(
+      #       search_term = cur_input(),
+      #       count = 1,
+      #       rds_path = newf,
+      #       date = Sys.Date()
+      #     )
+      #   )
+      #   return(NA)
+      # }
     } else {
       # observe({ print("483") })
       return(NA)
