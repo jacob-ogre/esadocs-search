@@ -32,7 +32,14 @@ similar_searches <- function(input, cur_input, rv) {
   })
   val_1 <- top_6[1]
   val_2 <- top_6[2]
-  return(list(sim_queries = sim_queries, val_1 = val_1, val_2 = val_2))
+  val_3 <- top_6[3]
+  val_4 <- top_6[4]
+  val_5 <- top_6[5]
+  val_6 <- top_6[6]
+  return(list(sim_queries = sim_queries,
+              val_1 = val_1, val_2 = val_2,
+              val_3 = val_3, val_4 = val_4,
+              val_5 = val_5, val_6 = val_6))
 }
 
 # run_

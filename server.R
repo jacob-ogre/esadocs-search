@@ -129,6 +129,7 @@ shinyServer(function(input, output, session) {
     )
   })
 
+  # I honestly don't know how to handle this case programmatically...oh well.
   sim_1 <- reactive({ input$search_1 })
   observeEvent(sim_1(), {
     updateTextInput(session, "main_input", value = similar_search_res()$val_1)
@@ -140,6 +141,34 @@ shinyServer(function(input, output, session) {
   observeEvent(sim_2(), {
     updateTextInput(session, "main_input", value = similar_search_res()$val_2)
     cur_res$cr <- main_search(input, similar_search_res()$val_2, min_score,
+                           max_hits, cur_type)
+  })
+
+  sim_3 <- reactive({ input$search_3 })
+  observeEvent(sim_3(), {
+    updateTextInput(session, "main_input", value = similar_search_res()$val_3)
+    cur_res$cr <- main_search(input, similar_search_res()$val_3, min_score,
+                           max_hits, cur_type)
+  })
+
+  sim_4 <- reactive({ input$search_4 })
+  observeEvent(sim_4(), {
+    updateTextInput(session, "main_input", value = similar_search_res()$val_4)
+    cur_res$cr <- main_search(input, similar_search_res()$val_4, min_score,
+                           max_hits, cur_type)
+  })
+
+  sim_5 <- reactive({ input$search_5 })
+  observeEvent(sim_5(), {
+    updateTextInput(session, "main_input", value = similar_search_res()$val_5)
+    cur_res$cr <- main_search(input, similar_search_res()$val_5, min_score,
+                           max_hits, cur_type)
+  })
+
+  sim_6 <- reactive({ input$search_6 })
+  observeEvent(sim_6(), {
+    updateTextInput(session, "main_input", value = similar_search_res()$val_6)
+    cur_res$cr <- main_search(input, similar_search_res()$val_6, min_score,
                            max_hits, cur_type)
   })
 
@@ -186,7 +215,7 @@ shinyServer(function(input, output, session) {
       div(class = "search-res",
         br(),
         fluidRow(
-          column(10,
+          column(12,
             a(href = gsub(
                 ifelse(!is.na(data$pdf_path[i]),
                        make_href(data$pdf_path[i]),
@@ -205,32 +234,31 @@ shinyServer(function(input, output, session) {
               )
             ),
             fluidRow(
-              column(3,
+              tags$div(
+                class = "justify",
                 div(class = "info-div",
+                    style = "text-align: center;",
                     icon("file-text-o"),
-                    str_replace_all(data$type[i], "_", " "))
-              ),
-              column(3,
+                    str_replace_all(data$type[i], "_", " ")),
                 div(class = "info-div",
+                    style = "text-align: center;",
                     icon("calendar"),
-                    data$date[i])
-              ),
-              column(3,
+                    data$date[i]),
                 div(class = "info-div",
+                    style = "text-align: center;",
                     icon("star"),
-                    paste("Score:", round(data$score[i], 3)))
-              ),
-              column(3,
+                    paste("Score:", round(data$score[i], 3))),
                 div(class = "info-div-right",
-                  if(is.na(data$link[i])) {
-                    "No original online"
-                  } else {
-                    span(icon("external-link"),
-                         a(href = data$link[i],
-                         class = "info_div_a",
-                         target = "_blank",
-                         "Original online"))
-                  }
+                    style = "text-align: center;",
+                    if(is.na(data$link[i])) {
+                      "No original online"
+                    } else {
+                      span(icon("external-link"),
+                           a(href = data$link[i],
+                           class = "info_div_a",
+                           target = "_blank",
+                           "Original online"))
+                    }
                 )
               )
             ),
@@ -240,7 +268,8 @@ shinyServer(function(input, output, session) {
               )
             ),
             fluidRow(
-              column(2,
+              tags$div(
+                class = "justify",
                 popify(
                   actionLink(
                     inputId = paste0("spp", i),
@@ -250,11 +279,9 @@ shinyServer(function(input, output, session) {
                   ),
                   title = "Relevant species",
                   content = HTML(unlist(data$species[i])),
-                  placement = "right",
+                  placement = "bottom",
                   trigger = "focus"
-                )
-              ),
-              column(2,
+                ),
                 popify(
                   actionLink(
                     inputId = paste0("state", i),
@@ -264,11 +291,9 @@ shinyServer(function(input, output, session) {
                   ),
                   title = "Relevant geographic places",
                   content = HTML(unlist(data$geo[i])),
-                  placement = "right",
+                  placement = "bottom",
                   trigger = "focus"
-                )
-              ),
-              column(2,
+                ),
                 popify(
                   actionLink(
                     inputId = paste0("rel_agency", i),
@@ -278,11 +303,9 @@ shinyServer(function(input, output, session) {
                   ),
                   title = "Relevant government agencies",
                   content = data$federal_agency[i],
-                  placement = "right",
+                  placement = "bottom",
                   trigger = "focus"
-                )
-              ),
-              column(2,
+                ),
                 popify(
                   actionLink(
                     inputId = paste0("tags", i),
@@ -292,19 +315,16 @@ shinyServer(function(input, output, session) {
                   ),
                   title = "Tags",
                   content = data$tags[i],
-                  placement = "right",
+                  placement = "bottom",
                   trigger = "focus"
-                )
-              ),
-              column(4,
+                ),
                 tags$div(
                   class = "doc_id",
                   data$id[i]
                 )
               )
             )
-          ),
-          column(2)
+          )
         ),
         div(style = "background:rgba(0,0,0,0)",
           br()

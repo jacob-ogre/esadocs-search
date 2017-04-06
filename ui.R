@@ -134,7 +134,7 @@ body <- dashboardBody(fluidPage(
               )
             ),
             fluidRow(
-              br(), br(),
+              br(),
               div(id = "new_behav_alert",
                 bsAlert("new_behavior")
               )
@@ -160,7 +160,7 @@ body <- dashboardBody(fluidPage(
             )
           )
         ),
-        fluidRow(textOutput("testing_msg")),
+        # fluidRow(textOutput("testing_msg")),
         fluidRow(
           hidden(
             div(id = "extras",
@@ -260,16 +260,12 @@ body <- dashboardBody(fluidPage(
         ),
 
         fluidRow(
-          column(8,
+          column(7,
             fluidRow(
-              column(3,
-                textOutput("n_hits")
-              ),
-              column(3,
-                textOutput("n_filt_hit")
-              ),
-              column(2),
-              column(4,
+              tags$div(
+                class = "justify",
+                textOutput("n_hits"),
+                textOutput("n_filt_hit"),
                 hidden(
                   tipify(
                     downloadButton("get_results", "Download"),
@@ -281,8 +277,8 @@ body <- dashboardBody(fluidPage(
             ),
             hidden(uiOutput("hits"))
           ),
+          column(1),
           column(4,
-            br(), br(),
             hidden(
               fluidRow(helpText(htmlOutput("n_docs")))
             ),
@@ -292,7 +288,7 @@ body <- dashboardBody(fluidPage(
           )
         ),
         fluidRow(
-          column(8,
+          column(7,
             fluidRow(
               br(),
               hidden(
@@ -360,7 +356,7 @@ body <- dashboardBody(fluidPage(
     fluidRow(
       div(
         id = "pad_foot",
-        br(), br(), br(), br(), br()
+        br(), br(), br(), br()
       ),
       hidden(div(
         br(), br(), br()

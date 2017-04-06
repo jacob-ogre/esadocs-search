@@ -1,12 +1,10 @@
 # BSD_2_clause
 #
 # MAIN SEARCH FUNCTION; note 50-result limit at this time, very simple search
-# function that needs to be beefed up
+# function that needs to be beefed up with some more complex query parsing
 
 main_search <- function(input, cur_input, min_score, max_hits, cur_type) {
-  # eventReactive(input$search, {
     hide("new_behav_alert", anim = TRUE, animType = "slide", time = 0.1)
-    # hide("more_hits_div", anim = TRUE, animType = "slide", time = 0.1)
     hide("spacer", anim = TRUE, animType = "slide", time = 0.1)
     hide("esadocs_large", anim = TRUE, animType = "fade", time = 0.1)
     hide("pad_foot", anim = TRUE, animType = "fade", time = 0.1)
@@ -119,27 +117,18 @@ main_search <- function(input, cur_input, min_score, max_hits, cur_type) {
         )
       }
       intermed_df <- distinct(intermed_df, file_name, .keep_all = TRUE)
-      # if(!a_match) {
-      #   id_str <- rand_str()
-      #   # newf <- paste0("/home/jacobmalcom/Data/ESAdocs_presearch/", id_str, ".rds")
-      #   newf <- paste0("~/Downloads/RDS_tests/", id_str, ".rds")
-      #   saveRDS(intermed_df, file = newf)
-      #   res <- docs_create(
-      #     index = "presearch",
-      #     type = "basic",
-      #     id = id_str,
-      #     body = list(
-      #       search_term = cur_input(),
-      #       count = 1,
-      #       rds_path = newf,
-      #       date = Sys.Date()
-      #     )
-      #   )
-      # }
+      id_str <- rand_str()
+      res <- docs_create(
+        index = "searches",
+        type = "basic",
+        id = id_str,
+        body = list(
+          search_term = cur_input,
+          date = Sys.Date()
+        )
+      )
       return(intermed_df)
     } else {
-      # observe({ print("483") })
       return(NA)
     }
-  # })
 }
