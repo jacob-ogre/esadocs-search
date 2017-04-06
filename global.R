@@ -11,6 +11,7 @@ library(shinyBS)
 library(shinyjs)
 library(shinyWidgets)
 library(stringr)
+library(tokenizers)
 
 system("touch restart.txt", intern = FALSE)
 

@@ -3,15 +3,25 @@
 source("help_modal.R")
 source("result_mgmt.R")
 source("main_search.R")
+source("similar_searches.R")
 
 ###############################################################################
 # SERVER
 
 shinyServer(function(input, output, session) {
 
-  cancel.onSessionEnded <- session$onSessionEnded(function() {
-    index_clear_cache("esadocs", query_cache = TRUE)
-  })
+  cur_res <- reactiveValues(cr = NULL)
+  searched <- reactiveValues(srch = FALSE)
+
+  createAlert(
+    session,
+    "new_behavior",
+    title = "New Behavior",
+    content = "We've tweaked the search behavior to improve performance. Adjust
+              the <b><em>Filters</em></b> as needed for deeper searching.",
+    style = "success",
+    dismiss = TRUE
+  )
 
   observeEvent(input$help, {
     help_modal()
@@ -27,7 +37,7 @@ shinyServer(function(input, output, session) {
     shinyjs::show("hits",
                   anim = TRUE,
                   animType = "fade",
-                  time = 0.25)
+                  time = 0.1)
   })
 
   navPage <- function(direction) {
@@ -40,7 +50,7 @@ shinyServer(function(input, output, session) {
                toggle("extras",
                       anim = TRUE,
                       animType = "fade",
-                      time = 0.25))
+                      time = 0.1))
 
   # the number of indexed documents; could change to an option() later
   output$n_docs <- renderText({
@@ -97,19 +107,53 @@ shinyServer(function(input, output, session) {
     as.Date(as.numeric(input$date_filt[2]), origin = "1970-01-01")
   })
 
-  cur_res <- main_search(input, cur_input, min_score, max_hits, cur_type)
+  # cur_res <- eventReactive(input$search, {
+  #   main_search(input, cur_input(), min_score, max_hits, cur_type)
+  # })
+
+  observeEvent(input$search, {
+    cur_res$cr <- main_search(input, cur_input(), min_score, max_hits, cur_type)
+    searched$srch <- TRUE
+  })
+
+  # eventReactive(input$search, {
+  similar_search_res <- reactive({
+    sim_res <- similar_searches(input, cur_input, rv)
+    rv <- sim_res$rv
+    sim_res
+  })
+
+  output$sim_srch <- renderUI({
+    fluidRow(
+      similar_search_res()$sim_queries
+    )
+  })
+
+  sim_1 <- reactive({ input$search_1 })
+  observeEvent(sim_1(), {
+    updateTextInput(session, "main_input", value = similar_search_res()$val_1)
+    cur_res$cr <- main_search(input, similar_search_res()$val_1, min_score,
+                           max_hits, cur_type)
+  })
+
+  sim_2 <- reactive({ input$search_2 })
+  observeEvent(sim_2(), {
+    updateTextInput(session, "main_input", value = similar_search_res()$val_2)
+    cur_res$cr <- main_search(input, similar_search_res()$val_2, min_score,
+                           max_hits, cur_type)
+  })
 
   n_match <- reactive({
-    a_res <- try(length(cur_res()[[1]]), silent = TRUE)
+    a_res <- try(length(cur_res$cr[[1]]), silent = TRUE)
     if(class(a_res) != "try-error") {
-      return(length(cur_res()[[1]]))
+      return(length(cur_res$cr[[1]]))
     } else {
       return(0)
     }
   })
 
   output$n_hits <- renderText({
-    if(test_nulls(cur_res())) {
+    if(test_nulls(cur_res$cr)) {
       return("")
     } else if(n_match() > 1) {
       return(paste("About", n_match(), "matches"))
@@ -284,7 +328,6 @@ shinyServer(function(input, output, session) {
 
   generate_hits <- function(dat) {
     n_hits <- length(dat[,1])
-    # n_pages <- n_pages()
     page_ls <- as.list(rep(NA, n_pages()))
     pages <- 1:n_pages()
     breaks <- seq(1, n_hits, srch_len())
@@ -311,14 +354,15 @@ shinyServer(function(input, output, session) {
   }
 
   res_df <- reactive({
+    if(!is.data.frame(cur_res$cr)) return(NULL)
     if(input$sortby == "rev_score") {
-      res_dft <- dplyr::arrange(cur_res(), score)
+      res_dft <- dplyr::arrange(cur_res$cr, score)
     } else if(input$sortby == "date") {
-      res_dft <- dplyr::arrange(cur_res(), date)
+      res_dft <- dplyr::arrange(cur_res$cr, date)
     } else if(input$sortby == "rev_date") {
-      res_dft <- dplyr::arrange(cur_res(), desc(date))
+      res_dft <- dplyr::arrange(cur_res$cr, desc(date))
     } else {
-      res_dft <- cur_res()
+      res_dft <- cur_res$cr
       if(length(res_dft) == 1) {
         if(is.na(res_dft)) {
           return(NULL)
@@ -341,9 +385,10 @@ shinyServer(function(input, output, session) {
   })
 
   output$hits <- renderUI({
-    if(test_nulls(cur_res())) {
-      h4("No matches; please enter another search.")
+    if(test_nulls(cur_res$cr) & searched$srch) {
+      h4(paste("No matches for", cur_input()))
     } else {
+      show("sim_search_h4")
       if(class(res_df()) != "data.frame") {
         return(res_df())
       }
@@ -357,6 +402,8 @@ shinyServer(function(input, output, session) {
         }
       })
       pages <- generate_hits(res_df())
+
+      shinyjs::show("similar_searches_div")
       if(length(pages) > 1) {
         shinyjs::show("prevButton")
         shinyjs::show("res_txt")
@@ -366,13 +413,30 @@ shinyServer(function(input, output, session) {
         shinyjs::hide("res_txt")
         shinyjs::hide("nextButton")
       }
+      if(dim(res_df())[1] > (0.85 * max_hits())) {
+        createAlert(
+          session,
+          "more_hits",
+          title = "More matches?",
+          content = "You're close to the maximum number of hits filter; there
+                    may be more matches of interest. Consider increasing the
+                    max number of hits in <em>Filters</em> and searching again
+                    for a more complete set of results.",
+          style = "warning",
+          dismiss = TRUE,
+          append = FALSE
+        )
+      } else {
+        hide("more_hits_div")
+        # try(closeAlert(session, "more_hits"), silent = TRUE)
+      }
       if(length(pages) < rv$current_page) rv$current_page <- 1
       return(pages[[rv$current_page]])
     }
   })
 
   output$summary_figs <- renderUI({
-    if(test_nulls(cur_res())) {
+    if(test_nulls(cur_res$cr)) {
       shinyjs::hide("prevButton")
       shinyjs::hide("res_txt")
       shinyjs::hide("nextButton")
@@ -385,9 +449,9 @@ shinyServer(function(input, output, session) {
     shinyjs::show("get_results")
     shinyjs::show("sortby")
 
-    if(dim(cur_res())[1] > 0) {
+    if(dim(cur_res$cr)[1] > 0) {
       output$doc_types <- DT::renderDataTable({
-        doc_tab <- sort(table(cur_res()$type), decreasing = TRUE)
+        doc_tab <- sort(table(cur_res$cr$type), decreasing = TRUE)
         types <- gsub(names(doc_tab), pattern = "_", replacement = " ")
         doc_df <- data.frame(type = types,
                              count = as.vector(doc_tab),
@@ -397,7 +461,7 @@ shinyServer(function(input, output, session) {
     }
 
     output$pages_plot <- renderPlot({
-      dat <- data.frame(score = as.numeric(cur_res()$n_pages))
+      dat <- data.frame(score = as.numeric(cur_res$cr$n_pages))
       if(dim(dat)[1] == 0) return(NULL)
       nbin <- floor(dim(dat)[1] / 3)
       if(nbin < 1) nbin <- 1
@@ -411,7 +475,7 @@ shinyServer(function(input, output, session) {
     })
 
     output$date_plot <- renderPlot({
-      dat <- data.frame(date = as.Date(cur_res()$date))
+      dat <- data.frame(date = as.Date(cur_res$cr$date))
       output$n_na_date <- renderText({
         paste("# docs without a date:", sum(is.na(dat$date)) )
       })
@@ -428,7 +492,7 @@ shinyServer(function(input, output, session) {
     })
 
     output$spp_table <- DT::renderDataTable({
-      spp_list <- str_split(paste(cur_res()$species, collapse = "<br>"), "<br>")
+      spp_list <- str_split(paste(cur_res$cr$species, collapse = "<br>"), "<br>")
       spp_tab <- sort(table(spp_list), decreasing = TRUE)
       spp_df <- data.frame(taxon = names(spp_tab),
                            count = as.vector(spp_tab),
@@ -437,7 +501,7 @@ shinyServer(function(input, output, session) {
     })
 
     output$score_plot <- renderPlot({
-      dat <- data.frame(score = cur_res()$score)
+      dat <- data.frame(score = cur_res$cr$score)
       if(dim(dat)[1] == 0) return(NULL)
       nbin <- floor(dim(dat)[1] / 3)
       if(nbin < 1) nbin <- 1
@@ -496,7 +560,7 @@ shinyServer(function(input, output, session) {
       "search_results.xlsx"
     },
     content=function(file) {
-      cur_data <- cur_res()
+      cur_data <- cur_res$cr
       for_write <- make_writeable(cur_data)
       rio::export(for_write, file = file)
     }

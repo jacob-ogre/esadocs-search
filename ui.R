@@ -66,7 +66,7 @@ body <- dashboardBody(fluidPage(
   ),
   div(class = "outer",
     shinyjs::useShinyjs(),
-    tags$style(appCSS),
+    # tags$style(appCSS),
     tags$head(
       HTML("<link href='https://fonts.googleapis.com/css?family=Open+Sans:300,400'
            rel='stylesheet' type='text/css'>"),
@@ -112,7 +112,7 @@ body <- dashboardBody(fluidPage(
             fluidRow(
               div(
                 class = "input-group",
-                style = "padding-top:20px",
+                style = "padding:20px",
                 textInput(
                   inputId = "main_input",
                   label = NULL,
@@ -120,31 +120,23 @@ body <- dashboardBody(fluidPage(
                   width = "100%"),
                 span(
                   class = "input-group-btn",
-                  withBusyIndicatorUI(
-                    actionButton(
-                      inputId = "search",
-                      label = NULL,
-                      icon = icon("search"),
-                      style = "primary",
-                      style="font-size: 150%;
-                             color: white;
-                             background-color: #0E3670;
-                             border-color: #2e6da4"
-                    )
+                  actionButton(
+                    inputId = "search",
+                    label = NULL,
+                    icon = icon("search"),
+                    style = "primary",
+                    style="font-size: 150%;
+                           color: white;
+                           background-color: #0E3670;
+                           border-color: #2e6da4"
                   )
                 )
               )
             ),
             fluidRow(
-              awesomeRadio(
-                inputId = "use_cache",
-                label = NULL,
-                choices = c(
-                  "Cache (faster)" = "yes",
-                  "No cache (thorough)" = "no"
-                ),
-                selected = "yes",
-                inline = TRUE
+              br(), br(),
+              div(id = "new_behav_alert",
+                bsAlert("new_behavior")
               )
             )
           ),
@@ -160,7 +152,7 @@ body <- dashboardBody(fluidPage(
               actionButton(
                 inputId = "tog_extras",
                 label = "Filters",
-                # icon = icon("filter"),
+                icon = icon("filter"),
                 size = "small",
                 type = "toggle",
                 value = FALSE
@@ -188,26 +180,27 @@ body <- dashboardBody(fluidPage(
                     multiple = FALSE)
                 )
               ),
-              column(1,
+              column(2,
                 selectInput(
                   inputId = "sortby",
                   label = NULL,
                   choices = list(
-                    "Sort" = "score",
+                    "Sort Score" = "score",
                     "Rev. Score" = "rev_score",
                     "Date" = "date",
                     "Rev. Date" = "rev_date"
                   ),
                   selected = "score",
-                  width = "125%"
+                  width = "95%"
                 )
               ),
-              column(3,
+              column(2,
                 dateRangeInput(
                   "date_filt",
                   label = NULL,
                   start = as.Date("1967-01-01"),
                   end = Sys.Date(),
+                  format = "d-M-yy",
                   width = "95%"
                 )
               ),
@@ -251,6 +244,7 @@ body <- dashboardBody(fluidPage(
                   "max_hits",
                   label = NULL,
                   choices = list(
+                    "Max hits = 50" = 50,
                     "Max hits = 100" = 100,
                     "Max hits = 500" = 500,
                     "Max hits = 1000" = 1000,
@@ -258,7 +252,7 @@ body <- dashboardBody(fluidPage(
                     "Max hits = 10000" = 10000
                   ),
                   width = "95%",
-                  selected = 500
+                  selected = 50
                 )
               )
             )
@@ -299,6 +293,20 @@ body <- dashboardBody(fluidPage(
         ),
         fluidRow(
           column(8,
+            fluidRow(
+              br(),
+              hidden(
+                div(
+                  id = "similar_searches_div",
+                  style = "margin: 0 15px",
+                  column(12,
+                    id = "similar_search_box",
+                    h4(id = "sim_search_h4", "Similar searches"),
+                    uiOutput("sim_srch")
+                  )
+                )
+              )
+            ),
             br(),
             div(
               id = "nextprev",
@@ -307,24 +315,37 @@ body <- dashboardBody(fluidPage(
                 hidden(
                   actionButton(
                     "prevButton",
-                    label = "< Previous",
+                    label = span(
+                      style = "font-size: larger",
+                      "< Previous"
+                    ),
                     style = "default",
                     size = "small"
                   )
                 )
               ),
               hidden(
-                div(
+                span(
                   id = "res_txt",
-                  "Results pages",
-                  style = "font-weight:bold; display:inline-block"
+                  "Results Pages",
+                  style = "font-weight:bold; font-size: large;
+                          vertical-align: middle; display:inline-block"
                 )
               ),
               div(style = "display: inline-block",
                 hidden(actionButton("nextButton",
-                         label = "Next >",
+                         label = span(
+                           style = "font-size:larger",
+                           "Next >"
+                         ),
                          style = "default",
                          size = "small"))
+              )
+            ),
+            fluidRow(
+              div(id = "more_hits_div",
+                br(),
+                bsAlert("more_hits")
               )
             )
           ),
@@ -334,17 +355,7 @@ body <- dashboardBody(fluidPage(
           br(), br()
         )
       ),
-      column(1,
-        br(), br(),
-        hidden(div(
-          id = "top_dow",
-          style = "position: absolute; right:10px",
-          tags$a(href="http://www.defenders.org",
-            img(src = "DOW_logo_small.png")
-          )
-        ))
-      ),
-      br()
+      column(1)
     ),
     fluidRow(
       div(

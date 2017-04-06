@@ -150,3 +150,35 @@ searched <- Search(
 )
 
 gg <- Search(index = "presearch", type = "basic", asdf = TRUE)$hits$hits$`_source`
+
+
+################3
+body <- list(
+  slice = list(
+    id = 0,
+    max = 2
+  ),
+  min_score = 0.1,
+  `_source` = list(
+    excludes = "raw_txt"
+  ),
+  query = list(
+    match_phrase = list(
+      raw_txt.shingles = "recovery unit"
+    )
+  ),
+  size = 500,
+  highlight = list(
+    fields = list(
+      raw_txt.shingles = list(
+        `type` = "fvh",
+        `fragment_size` = 150,
+        `pre_tags` = list("<b>"),
+        `post_tags` = list("</b>")
+      )
+    )
+  )
+)
+
+r1 <- Search(index = 'esadocs', scroll="5m", body = body)
+scroll(scroll_id = r1$`_scroll_id`)
