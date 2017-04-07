@@ -191,7 +191,8 @@ body <- dashboardBody(fluidPage(
                     "Rev. Date" = "rev_date"
                   ),
                   selected = "score",
-                  width = "95%"
+                  width = "95%",
+                  multiple = FALSE
                 )
               ),
               column(2,
@@ -323,7 +324,7 @@ body <- dashboardBody(fluidPage(
               hidden(
                 span(
                   id = "res_txt",
-                  "Results Pages",
+                  "Results",
                   style = "font-weight:bold; font-size: large;
                           vertical-align: middle; display:inline-block"
                 )

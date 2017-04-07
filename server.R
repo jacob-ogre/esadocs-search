@@ -213,7 +213,7 @@ shinyServer(function(input, output, session) {
 
     div(id = paste0("pg", pg),
       div(class = "search-res",
-        br(),
+        # br(),
         fluidRow(
           column(12,
             a(href = gsub(
@@ -325,9 +325,6 @@ shinyServer(function(input, output, session) {
               )
             )
           )
-        ),
-        div(style = "background:rgba(0,0,0,0)",
-          br()
         )
       )
     )
@@ -462,12 +459,10 @@ shinyServer(function(input, output, session) {
       shinyjs::hide("nextButton")
       shinyjs::hide("summ_head")
       shinyjs::hide("get_results")
-      shinyjs::hide("sortby")
       return(NULL)
     }
     shinyjs::show("summ_head")
     shinyjs::show("get_results")
-    shinyjs::show("sortby")
 
     if(dim(cur_res$cr)[1] > 0) {
       output$doc_types <- DT::renderDataTable({

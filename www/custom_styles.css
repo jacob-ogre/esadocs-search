@@ -32,7 +32,7 @@ h1, h2, h3, h4 { font-weight: 400; }
 .search-res {
   background-color: white;
   border-bottom: 1px solid #d9d9d9;
-  padding: 10px;
+  padding: 20px 10px;
 }
 
 .selectize-input {
@@ -198,10 +198,11 @@ img {
 }
 
 #similar_search_box {
+  border-radius: 2px;
   -webkit-box-shadow: 0 0 2px 2px rgba(0,0,0,.12);
   -moz-box-shadow: 0 0 2px 2px rgba(0,0,0,.12);
   box-shadow: 0 0 2px 2px rgba(0, 0, 0, 0.12);
-  padding: 10px 20px;
+  padding: 20px 20px;
 }
 
 .justify {
