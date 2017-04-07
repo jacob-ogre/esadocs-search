@@ -339,7 +339,9 @@ body <- dashboardBody(fluidPage(
               )
             ),
             fluidRow(
-              div(id = "more_hits_div",
+              div(
+                id = "more_hits_div",
+                style = "padding: 0 15px;",
                 br(),
                 bsAlert("more_hits")
               )
