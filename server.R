@@ -12,6 +12,7 @@ shinyServer(function(input, output, session) {
 
   cur_res <- reactiveValues(cr = NULL)
   searched <- reactiveValues(srch = FALSE)
+  rv <- reactiveValues(current_page = 1)
 
   createAlert(
     session,
@@ -27,7 +28,7 @@ shinyServer(function(input, output, session) {
     help_modal()
   })
 
-  rv <- reactiveValues(current_page = 1)
+  disable("no_similar_searches")
 
   # observer for incrementing pages
   observe({

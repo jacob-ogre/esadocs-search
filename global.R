@@ -10,6 +10,7 @@ library(shinydashboard)
 library(shinyBS)
 library(shinyjs)
 library(shinyWidgets)
+library(stringdist)
 library(stringr)
 library(tokenizers)
 

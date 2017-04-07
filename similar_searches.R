@@ -18,7 +18,32 @@ similar_searches <- function(input, cur_input, rv) {
     stringsAsFactors = FALSE
   )
   cur_hit_tab <- filter(cur_hit_tab, cur_hit_tab$Var1 != cur_input())
-  cur_hit_arr <- arrange(cur_hit_tab, -Freq)
+  if(dim(cur_hit_tab)[1] == 0) {
+    a_res <- column(4,
+      actionButton(
+        "no_similar_searches",
+        label = "-- No similar terms --",
+        value = "",
+        style = "color: #757575; font-weight: 600"
+      )
+    )
+    return(list(sim_queries = a_res,
+                val_1 = NA, val_2 = NA,
+                val_3 = NA, val_4 = NA,
+                val_5 = NA, val_6 = NA))
+  }
+  cur_hit_tab$dist <- stringdist::stringdist(
+    tolower(cur_hit_tab$Var1),
+    tolower(cur_input())
+  )
+  cur_hit_tab$max_dist <- sapply(
+    cur_hit_tab$Var1,
+    function(x) {
+      max(nchar(x), nchar(cur_input()))
+    }
+  )
+  cur_hit_tab$rel_dist <- cur_hit_tab$dist / cur_hit_tab$max_dist
+  cur_hit_arr <- arrange(cur_hit_tab, rel_dist, -Freq)
   top_6 <- head(cur_hit_arr$Var1)
   sim_queries <- lapply(1:length(top_6), function(x) {
     column(4,
