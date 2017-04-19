@@ -333,6 +333,7 @@ shinyServer(function(input, output, session) {
 
   n_pages <- reactive({
     if(!test_nulls(res_df())) {
+      # observe(print(res_df()))
       n_hits <- length(res_df()[,1])
       n_pages_l <- n_hits %/% srch_len()
       if(n_hits %% srch_len() != 0) {
@@ -348,7 +349,8 @@ shinyServer(function(input, output, session) {
     n_hits <- length(dat[,1])
     page_ls <- as.list(rep(NA, n_pages()))
     pages <- 1:n_pages()
-    breaks <- seq(1, n_hits, srch_len())
+    breaks <- try(seq(1, n_hits, srch_len()), silent = TRUE)
+    if(class(breaks) == "try-error") return("NOTHING")
     if(length(breaks) == 1) {
       page_ls[[1]] <- lapply(1:length(dat[, 1]), hit_page, data = dat, pg = 1)
     } else {
@@ -381,6 +383,7 @@ shinyServer(function(input, output, session) {
       res_dft <- dplyr::arrange(cur_res$cr, desc(date))
     } else {
       res_dft <- cur_res$cr
+      # observe({ print(length(res_dft)) })
       if(length(res_dft) == 1) {
         if(is.na(res_dft)) {
           return(NULL)
@@ -393,22 +396,30 @@ shinyServer(function(input, output, session) {
     if(dim(res_dft)[1] == 0) {
       return(h4("No matches greater than filter score; please adjust."))
     }
+    observe({print(dim(res_dft))})
     if(input$type_filt != "all") {
       res_dft <- dplyr::filter(res_dft, type == input$type_filt)
     }
     if(dim(res_dft)[1] == 0) {
-      return(h4("No matches for that type; please adjust type."))
+      return(NULL)
+      # return(h4("No matches for that type; please adjust type."))
     }
     return(res_dft)
   })
 
   output$hits <- renderUI({
+    # observe({ print(paste("test_nulls_cr", test_nulls(cur_res$cr))) })
+    # observe({ print(paste("srch", searched$srch)) })
     if(test_nulls(cur_res$cr) & searched$srch) {
       h4(paste("No matches for", cur_input()))
+    } else if(test_nulls(cur_res$cr) & !searched$srch) {
+      return("")
     } else {
       show("sim_search_h4")
-      if(class(res_df()) != "data.frame") {
-        return(res_df())
+      if(class(res_df()) != "data.frame" & searched$srch) {
+        output$n_filt_hit <- renderText("Zero filtered hits")
+        return(NULL)
+        # return(res_df())
       }
       output$n_filt_hit <- reactive({
         filt_hits <- dim(res_df())[1]
