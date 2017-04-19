@@ -276,7 +276,9 @@ body <- dashboardBody(fluidPage(
                 )
               )
             ),
-            hidden(uiOutput("hits"))
+            hidden(uiOutput("hits")),
+            br(),
+            bsAlert("no_filtered_hits")
           ),
           column(1),
           column(4,

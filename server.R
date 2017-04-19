@@ -334,7 +334,8 @@ shinyServer(function(input, output, session) {
   n_pages <- reactive({
     if(!test_nulls(res_df())) {
       # observe(print(res_df()))
-      n_hits <- length(res_df()[,1])
+      n_hits <- try(length(res_df()[,1]), silent = TRUE)
+      if(class(n_hits) == "try-error") return(NULL)
       n_pages_l <- n_hits %/% srch_len()
       if(n_hits %% srch_len() != 0) {
         n_pages_l <- n_pages_l + 1
@@ -396,7 +397,7 @@ shinyServer(function(input, output, session) {
     if(dim(res_dft)[1] == 0) {
       return(h4("No matches greater than filter score; please adjust."))
     }
-    observe({print(dim(res_dft))})
+    # observe({print(dim(res_dft))})
     if(input$type_filt != "all") {
       res_dft <- dplyr::filter(res_dft, type == input$type_filt)
     }
@@ -408,8 +409,6 @@ shinyServer(function(input, output, session) {
   })
 
   output$hits <- renderUI({
-    # observe({ print(paste("test_nulls_cr", test_nulls(cur_res$cr))) })
-    # observe({ print(paste("srch", searched$srch)) })
     if(test_nulls(cur_res$cr) & searched$srch) {
       h4(paste("No matches for", cur_input()))
     } else if(test_nulls(cur_res$cr) & !searched$srch) {
@@ -418,6 +417,17 @@ shinyServer(function(input, output, session) {
       show("sim_search_h4")
       if(class(res_df()) != "data.frame" & searched$srch) {
         output$n_filt_hit <- renderText("Zero filtered hits")
+        createAlert(
+          session,
+          anchorId = "no_filtered_hits",
+          title = "No filtered hits",
+          content = "No documents meet the Filter criteria. Consider making the
+                    filters less stringent (for example, a higher maximum number
+                    of hits, or a lower minimum score) and searching again.",
+          style = "warning",
+          dismiss = TRUE,
+          append = FALSE
+        )
         return(NULL)
         # return(res_df())
       }
