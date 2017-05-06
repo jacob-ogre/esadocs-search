@@ -18,41 +18,10 @@ main_search <- function(input, cur_input, min_score, max_hits, cur_type) {
       res_df <- single_asdf(the_doc)
       return(res_df)
     }
-    # searched <- Search(
-    #   index = "presearch",
-    #   type = "basic",
-    #   body = list(
-    #     query = list(
-    #       match_phrase = list(
-    #         search_term = cur_input()
-    #       )
-    #     )
-    #   ),
-    #   asdf = TRUE
-    # )
-    # s_res <- searched$hits$hits$`_source`
-    # s_res$id <- searched$hits$hits$`_id`
-    # a_match <- FALSE
-    # if(!is.null(s_res)) {
-    #   perf_match <- filter(s_res, search_term == cur_input())
-    #   a_match <- TRUE
-    # }
-    # if(exists("perf_match") &&
-    #    length(perf_match$search_term) > 0 &&
-    #    input$use_cache == "yes") {
-    #   cur_res <- readRDS(perf_match$rds_path)
-    #   upd <- docs_update(
-    #     index = "presearch",
-    #     type = "basic",
-    #     id = perf_match$id,
-    #     body = list(
-    #       doc = list(count = perf_match$count + 1)
-    #     )
-    #   )
-    #   return(cur_res)
-    # } else if(grepl(cur_input(), pattern = "^(\"|\')[[:print:]]+(\"|\')$")) {
-    # a_match <- FALSE
+
+    # query is fully quoted:
     if(grepl(cur_input, pattern = "^(\"|\')[[:print:]]+(\"|\')$")) {
+      basic <- FALSE
       body <- list(
         min_score = min_score(),
         `_source` = list(
@@ -65,35 +34,37 @@ main_search <- function(input, cur_input, min_score, max_hits, cur_type) {
         ),
         size = max_hits(),
         highlight = list(
+          `require_field_match` = FALSE,
+          order = "score",
           fields = list(
             raw_txt.shingles = list(
+              `matched_fields` = "raw_txt",
               `type` = "fvh",
               `fragment_size` = 150,
-              `pre_tags` = list("<b>"),
-              `post_tags` = list("</b>")
+              `pre_tags` = list("<span style='font-weight:700'>"),
+              `post_tags` = list("</span>")
             )
           )
         )
       )
     } else {
+      basic <- TRUE
       body <- list(
         min_score = min_score(),
         `_source` = list(
           excludes = "raw_txt"
         ),
-        query = list(
-          match = list(
-            raw_txt.shingles = cur_input
-          )
-        ),
         size = max_hits(),
         highlight = list(
+          `require_field_match` = FALSE,
+          order = "score",
           fields = list(
             raw_txt.shingles = list(
+              `matched_fields` = "raw_txt",
               `type` = "fvh",
               `fragment_size` = 150,
-              `pre_tags` = list("<b>"),
-              `post_tags` = list("</b>")
+              `pre_tags` = list("<span style='font-weight:700'>"),
+              `post_tags` = list("</span>")
             )
           )
         )
@@ -102,18 +73,26 @@ main_search <- function(input, cur_input, min_score, max_hits, cur_type) {
     withProgress(
       message = "Searching ESAdocs...",
       value = 0.5, {
-        cur_mats <- Search(
-          "esadocs",
-          type = cur_type(),
-          body = body)$hits$hits
+        if(basic) {
+          cur_mats <- Search(
+            "esadocs",
+            type = cur_type(),
+            q = cur_input,
+            body = body)$hits$hits
+        } else {
+          cur_mats <- Search(
+            "esadocs",
+            type = cur_type(),
+            body = body)$hits$hits
+        }
     })
     if(length(cur_mats) > 0) {
       intermed_df <- result_asdf(cur_mats)
       res <- try(intermed_df$highlight <- get_highlight(cur_mats))
       if(class(res) == "try-error") {
         intermed_df$highlight <- paste0(
-          "Sorry, no context highlighting available for the search <b>", cur_input, "</b>.",
-          " Please open the linked PDF and search within to find context."
+          "Sorry, no context highlighting available for the search <b>", cur_input,
+          "</b>. Please open the linked PDF and search within to find context."
         )
       }
       intermed_df <- distinct(intermed_df, file_name, .keep_all = TRUE)

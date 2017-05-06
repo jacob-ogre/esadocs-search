@@ -81,7 +81,7 @@ shinyServer(function(input, output, session) {
 
   # placeholder function for cleaning input; will probably be extended
   replace_chars <- function(x) {
-    x <- gsub(x, pattern = '\'|\"', replacement = '\\"', fixed = TRUE)
+    x <- gsub(x, pattern = '\'|\"', replacement = "\\'", fixed = TRUE)
     return(x)
   }
 

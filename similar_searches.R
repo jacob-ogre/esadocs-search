@@ -11,7 +11,10 @@ similar_searches <- function(input, cur_input, rv) {
     )
   )
   cur_qs <- cur_in_spl[!(cur_in_spl %in% tokenizers::stopwords())]
-  agreps <- unlist(sapply(cur_qs, function(x) agrep(x = srch_tms, pattern = x)))
+  agreps <- try(
+    unlist(sapply(cur_qs, function(x) agrep(x = srch_tms, pattern = x))),
+    silent = TRUE
+  )
   cur_hits <- cur_srch[unique(agreps), ]
   cur_hit_tab <- as.data.frame.table(
     table(cur_hits$search_term),
@@ -45,8 +48,9 @@ similar_searches <- function(input, cur_input, rv) {
   cur_hit_tab$rel_dist <- cur_hit_tab$dist / cur_hit_tab$max_dist
   cur_hit_arr <- arrange(cur_hit_tab, rel_dist, -Freq)
   top_6 <- head(cur_hit_arr$Var1)
-  sim_queries <- lapply(1:length(top_6), function(x) {
-    column(4,
+  top_6_shrt <- substr(top_6, 1, 22)
+  sim_queries <- lapply(1:length(top_6_shrt), function(x) {
+    column(6,
       actionButton(
         paste0("search_", x),
         label = top_6[x],

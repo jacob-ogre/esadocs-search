@@ -132,12 +132,12 @@ body <- dashboardBody(fluidPage(
                   )
                 )
               )
-            ),
-            fluidRow(
-              br(),
-              div(id = "new_behav_alert",
-                bsAlert("new_behavior")
-              )
+            # ),
+            # fluidRow(
+            #   br(),
+            #   div(id = "new_behav_alert",
+            #     bsAlert("new_behavior")
+            #   )
             )
           ),
           column(2,
