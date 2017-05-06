@@ -1,6 +1,7 @@
 # BSD_2_clause
 
 source("help_modal.R")
+source("about_modal.R")
 source("result_mgmt.R")
 source("main_search.R")
 source("similar_searches.R")
@@ -26,6 +27,10 @@ shinyServer(function(input, output, session) {
 
   observeEvent(input$help, {
     help_modal()
+  })
+
+  observeEvent(input$about, {
+    about_modal()
   })
 
   disable("no_similar_searches")

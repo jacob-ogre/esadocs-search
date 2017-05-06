@@ -25,7 +25,7 @@ body <- dashboardBody(fluidPage(
         ),
         tags$a(
           class = "navbar-brand",
-          style = "font-weight:800",
+          style = "font-weight:900; font-size:large",
           href = "https://cci-dev.org",
           tabindex = -1,
           "CCI-dev"
@@ -40,7 +40,7 @@ body <- dashboardBody(fluidPage(
             tags$a(
               href = "http://www.defenders.org/innovation",
               target = "_blank",
-              style = "font-weight:800",
+              style = "font-weight:500; font-size:large;",
               tabindex = -1,
               "Defenders"
             )
@@ -57,6 +57,17 @@ body <- dashboardBody(fluidPage(
                 target = "_blank",
                 tabindex = -1,
                 shiny::icon("github fa-2x")
+              )
+            )
+          ),
+          tags$li(
+            span(
+              actionLink(
+                inputId = "about",
+                label = "About",
+                tabindex = -1,
+                style = "color:#9D9D9D; font-size:large; padding-left:10px",
+                icon = NULL
               )
             )
           )
