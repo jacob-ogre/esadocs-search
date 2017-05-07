@@ -96,6 +96,14 @@ shinyServer(function(input, output, session) {
     return(res)
   })
 
+  # reactive form of input$main_input
+  cur_input_basic <- reactive({
+    res <- replace_chars(input$main_input)
+    res <- gsub(res, pattern = " and ", replacement = " AND ")
+    res <- gsub(res, pattern = " or ", replacement = " OR ")
+    return(res)
+  })
+
   cur_type <- reactive({
     if(input$type_filt == "all") {
       return("")
@@ -118,7 +126,8 @@ shinyServer(function(input, output, session) {
   # })
 
   observeEvent(input$search, {
-    cur_res$cr <- main_search(input, cur_input(), min_score, max_hits, cur_type)
+    cur_res$cr <- main_search(input, cur_input(), cur_input_basic(),
+                              min_score, max_hits, cur_type)
     searched$srch <- TRUE
   })
 

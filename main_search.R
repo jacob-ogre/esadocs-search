@@ -3,7 +3,8 @@
 # MAIN SEARCH FUNCTION; note 50-result limit at this time, very simple search
 # function that needs to be beefed up with some more complex query parsing
 
-main_search <- function(input, cur_input, min_score, max_hits, cur_type) {
+main_search <- function(input, cur_input, cur_input_basic, min_score,
+                        max_hits, cur_type) {
     hide("new_behav_alert", anim = TRUE, animType = "slide", time = 0.1)
     hide("spacer", anim = TRUE, animType = "slide", time = 0.1)
     hide("esadocs_large", anim = TRUE, animType = "fade", time = 0.1)
@@ -47,12 +48,18 @@ main_search <- function(input, cur_input, min_score, max_hits, cur_type) {
           )
         )
       )
-    } else {
+    } else { # query is more complex
       basic <- TRUE
       body <- list(
         min_score = min_score(),
         `_source` = list(
           excludes = "raw_txt"
+        ),
+        query = list(
+          query_string = list(
+            `default_field` = "raw_txt.shingles",
+            query = cur_input_basic
+          )
         ),
         size = max_hits(),
         highlight = list(
@@ -73,18 +80,17 @@ main_search <- function(input, cur_input, min_score, max_hits, cur_type) {
     withProgress(
       message = "Searching ESAdocs...",
       value = 0.5, {
-        if(basic) {
-          cur_mats <- Search(
-            "esadocs",
-            type = cur_type(),
-            q = cur_input,
-            body = body)$hits$hits
-        } else {
-          cur_mats <- Search(
-            "esadocs",
-            type = cur_type(),
-            body = body)$hits$hits
-        }
+        # if(basic) {
+        cur_mats <- Search(
+          "esadocs",
+          type = cur_type(),
+          body = body)$hits$hits
+        # } else {
+        #   cur_mats <- Search(
+        #     "esadocs",
+        #     type = cur_type(),
+        #     body = body)$hits$hits
+        # }
     })
     if(length(cur_mats) > 0) {
       intermed_df <- result_asdf(cur_mats)

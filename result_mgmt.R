@@ -107,9 +107,13 @@ get_highlight <- function(res) {
   # unfortunately, lapply doesn't seem to work well over an ES result object,
   # at least not without getting way more complicated than using a for loop
   for(i in 1:length(res)) {
-    hi_tmp <- lapply(res[[i]]$highlight, FUN = abbrev)
-    hi_tmp <- str_replace_all(hi_tmp, "[ ]{2,}|\n", " ")
-    res_ls[[i]] <- hi_tmp
+    if(!("highlight" %in% names(res[[i]]))) {
+      res_ls[[i]] <- "Sorry, no search term highlighting available for this document."
+    } else {
+      hi_tmp <- lapply(res[[i]]$highlight, FUN = abbrev)
+      hi_tmp <- str_replace_all(hi_tmp, "[ ]{2,}|\n", " ")
+      res_ls[[i]] <- hi_tmp
+    }
   }
   res_vec <- unlist(res_ls)
   return(res_vec)
