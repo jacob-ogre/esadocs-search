@@ -25,7 +25,7 @@ div.outer {
 /* Customize fonts */
 body, label, input, button, select {
   font-family: 'Open Sans';
-  font-weight: 300;
+  font-weight: 400;
 }
 h1, h2, h3, h4 { font-weight: 400; }
 
@@ -107,7 +107,7 @@ img {
 
 .tag_info {
   color: #1A237E !important;
-  font-weight: 300;
+  font-weight: 400;
   padding-top: 3px;
   padding-bottom: 3px;
 }
@@ -133,7 +133,7 @@ img {
 
 .popover-content {
   font-size: 90%;
-  font-weight: 300;
+  font-weight: 400;
 }
 
 .nav-tabs>li>a, .nav-tabs>li.active {

@@ -63,7 +63,7 @@ shinyServer(function(input, output, session) {
     tmp <- try(index_stats("esadocs")$indices$esadocs$primaries$docs$count,
                silent = TRUE)
     if(class(tmp) == "try-error") {
-      return("<span style='color:red; font-weight:700'>The server is down;
+      return("<span style='color#FFB74D:red; font-weight:700'>The server is down;
              please wait a few minutes and try again.
              <a href='mailto:esa@defenders.org'>Contact us</a> if the problem
              persists.")
@@ -135,6 +135,7 @@ shinyServer(function(input, output, session) {
   similar_search_res <- reactive({
     sim_res <- similar_searches(input, cur_input, rv)
     rv <- sim_res$rv
+    # cat(stderr(), paste(sim_res$sim_queries, collapse = " | "), "\n")
     sim_res
   })
 
@@ -147,15 +148,36 @@ shinyServer(function(input, output, session) {
   # I honestly don't know how to handle this case programmatically...oh well.
   sim_1 <- reactive({ input$search_1 })
   observeEvent(sim_1(), {
+    loc_cur_type <- reactive({
+      if(input$type_filt == "all") {
+        return("")
+      } else {
+        return(input$type_filt)
+      }
+    })
+
+    loc_min_score <- reactive({
+      as.numeric(input$min_score)
+    })
+
+    loc_max_hits <- reactive({
+      as.numeric(input$max_hits)
+    })
+
     updateTextInput(session, "main_input", value = similar_search_res()$val_1)
-    cur_res$cr <- main_search(input, similar_search_res()$val_1, min_score,
-                           max_hits, cur_type)
+    cur_res$cr <- main_search(input, cur_input = similar_search_res()$val_1,
+                              cur_input_basic = similar_search_res()$val_1,
+                              min_score = loc_min_score,
+                              max_hits = loc_max_hits, cur_type = loc_cur_type)
   })
 
   sim_2 <- reactive({ input$search_2 })
   observeEvent(sim_2(), {
     updateTextInput(session, "main_input", value = similar_search_res()$val_2)
-    cur_res$cr <- main_search(input, similar_search_res()$val_2, min_score,
+    cur_res$cr <- main_search(input,
+                              cur_input = similar_search_res()$val_2,
+                              cur_input_basic = similar_search_res()$val_2,
+                              min_score,
                            max_hits, cur_type)
   })
 
@@ -209,21 +231,10 @@ shinyServer(function(input, output, session) {
   # MAIN HTML GENERATION
   hit_page <- function(i, data, pg) {
     make_href <- function(ln) {
-      hypo <- "https://via.hypothes.is/"
-      ccid <- "https://esadocs.cci-dev.org"
-      if(!grepl(ln, pattern = "^https://esadocs.cci-dev.org")) {
-        if(grepl(ln, pattern = "https://cci-dev.org")) {
-          ln <- gsub(ln, pattern = "^https://cci-dev.org", replacement = ccid)
-          return(paste0(hypo, ln))
-        }
-        if(grepl(ln, pattern = "https://defend-esc-dev.org")) {
-          ln <- gsub(ln, pattern = "https://defend-esc-dev.org", replacement = ccid)
-          return(paste0(hypo, ln))
-        }
-        if(!grepl(ln, pattern = "^https")) return(paste0(hypo, ccid, ln))
-      } else {
-        if(!grepl(ln, pattern = hypo)) return(paste0(hypo, ln))
-      }
+      # cat(file = stderr(), "ln: ", ln, "\n")
+      path <- stringr::str_extract(ln, "ESAdocs.*")
+      new_ln <- paste0("https://esadocs.cci-dev.org/", path)
+      return(new_ln)
     }
 
     div(id = paste0("pg", pg),
@@ -608,10 +619,15 @@ shinyServer(function(input, output, session) {
   })
 
   output$get_results <- downloadHandler(filename=function() {
-      "search_results.xlsx"
+      paste0(
+        "search_results-",
+        gsub(cur_input(), pattern = " ", replacement = "_"),
+        ".xlsx"
+      )
     },
     content=function(file) {
       cur_data <- cur_res$cr
+      cur_data <- select(cur_data, -c(pdf_path, txt_path))
       for_write <- make_writeable(cur_data)
       rio::export(for_write, file = file)
     }

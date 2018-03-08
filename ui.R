@@ -79,7 +79,7 @@ body <- dashboardBody(fluidPage(
     shinyjs::useShinyjs(),
     # tags$style(appCSS),
     tags$head(
-      HTML("<link href='https://fonts.googleapis.com/css?family=Open+Sans:300,400'
+      HTML("<link href='https://fonts.googleapis.com/css?family=Open+Sans:300,400,700,900'
            rel='stylesheet' type='text/css'>"),
       HTML('<link rel="icon" type="image/png" href="favicon-32x32.png" sizes="32x32" />'),
       tags$script(src = "google_analytics.js"),
@@ -260,8 +260,8 @@ body <- dashboardBody(fluidPage(
                     "Max hits = 100" = 100,
                     "Max hits = 500" = 500,
                     "Max hits = 1000" = 1000,
-                    "Max hits = 5000" = 5000,
-                    "Max hits = 10000" = 10000
+                    "Max hits = 5000" = 5000 #,
+                    # "Max hits = 10000" = 10000
                   ),
                   width = "95%",
                   selected = 50
@@ -403,7 +403,7 @@ body <- dashboardBody(fluidPage(
             <br />
             <p>This <span xmlns:dct="http://purl.org/dc/terms/" href="http://purl.org/dc/dcmitype/InteractiveResource" rel="dct:type">work</span>
             by <a xmlns:cc="http://creativecommons.org/ns" href="http://defenders.org" property="cc:attributionName" rel="cc:attributionURL">Defenders of Wildlife</a>
-            is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/">Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License</a>.</p>
+            is licensed under a <a rel="license" href="https://creativecommons.org/licenses/by-nc-sa/4.0/legalcode">Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License</a>.</p>
             <br />
           </footer>'),
           br()

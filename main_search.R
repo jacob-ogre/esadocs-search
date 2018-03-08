@@ -70,7 +70,8 @@ main_search <- function(input, cur_input, cur_input_basic, min_score,
               `matched_fields` = "raw_txt",
               `type` = "fvh",
               `fragment_size` = 150,
-              `pre_tags` = list("<span style='font-weight:700'>"),
+              `pre_tags` = list("<span style='font-weight:900;
+                                text-decoration:dotted underline'>"),
               `post_tags` = list("</span>")
             )
           )

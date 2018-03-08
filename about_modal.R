@@ -5,7 +5,7 @@ about_modal <- function() {
       tags$p(
         style="font-size:larger",
         "ESAdocs Search is the most comprehensive tool for searching the text of
-        documents on the U.S. Endangered Species Act.  It now covers nearly
+        documents on the U.S. Endangered Species Act.  It now covers over
         14,000 documents, including all ESA recovery plans, five-year status
         reviews, and Federal Register notices from the websites of the U.S. Fish
         and Wildlife Service and the National Marine Fisheries Service.  It also
