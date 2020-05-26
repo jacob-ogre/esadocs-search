@@ -8,7 +8,7 @@ Requires an Elasticsearch instance running on `localhost`.
 
 ## Live version
 
-A live version of the app can be found [here](https://esadocs.cci-dev.org).
+A live version of the app can be found [here](https://esadocs.defenders-cci.org).
 
 ## Issues
 
